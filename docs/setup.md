@@ -1,6 +1,15 @@
 # Setup Guide (MVP Bootstrap)
 
-## Planned Tech Stack
+## Planned Tech Stack (MVP)
+
+### Phase 0 (Viability Spike)
+
+- Docker Compose
+- CodeProject.AI
+- PostgreSQL
+- Python evaluation scripts
+
+### Phase 1 (Core Backend)
 
 - Java 21
 - Spring Boot
