@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: visionai
       POSTGRES_PASSWORD: visionai
     ports:
-      - "5432:5432"
+      - "5555:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -25,11 +25,11 @@ services:
     environment:
       CPAI_PORT: "32168"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:32168/v1/status"]
+      test: ["CMD", "curl", "-f", "http://localhost:32168"]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 60s
+      start_period: 10s
 
   app:
     build: .

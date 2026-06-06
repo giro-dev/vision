@@ -3,7 +3,7 @@ spring:
     name: visionai
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/visionai
+    url: jdbc:postgresql://localhost:5555/visionai
     username: visionai
     password: visionai
 
