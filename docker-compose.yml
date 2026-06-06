@@ -1,0 +1,52 @@
+services:
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: visionai
+      POSTGRES_USER: visionai
+      POSTGRES_PASSWORD: visionai
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U visionai"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  codeproject-ai:
+    image: codeproject/ai-server:latest
+    ports:
+      - "32168:32168"
+    volumes:
+      - cpai-data:/etc/codeproject/ai
+    environment:
+      CPAI_PORT: "32168"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:32168/v1/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/visionai
+      SPRING_DATASOURCE_USERNAME: visionai
+      SPRING_DATASOURCE_PASSWORD: visionai
+      VISION_CODEPROJECT_AI_URL: http://codeproject-ai:32168
+    depends_on:
+      postgres:
+        condition: service_healthy
+      codeproject-ai:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  cpai-data:
