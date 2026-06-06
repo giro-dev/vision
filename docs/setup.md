@@ -11,7 +11,7 @@
 
 ### Phase 1 (Core Backend)
 
-- Java 21
+- Java 25
 - Spring Boot
 - PostgreSQL
 - Flyway
