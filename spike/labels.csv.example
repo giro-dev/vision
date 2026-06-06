@@ -1,0 +1,5 @@
+filename,expected_type,expected_label
+person_01.jpg,face,Alice
+person_02.jpg,face,Bob
+car_01.jpg,plate,ABC1234
+night_01.jpg,face,Charlie
