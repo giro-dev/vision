@@ -21,6 +21,6 @@ This repository now includes an **MVP starting point** based on the roadmap:
 - Ports/adapters design for cameras and AI engines
 - Delivery plan for database, testing baseline, and Docker Compose target
 
-## Next step
+## Next steps
 
 Use the docs above to bootstrap implementation of Phase 0 and Phase 1 in small increments.
