@@ -4,6 +4,8 @@ import dev.giro.vision.vehicle.domain.Vehicle;
 import dev.giro.vision.vehicle.domain.VehicleService;
 import dev.giro.vision.vehicle.port.PlateRecognitionPort;
 import dev.giro.vision.vehicle.port.PlateRecognitionPort.PlateResult;
+import dev.giro.vision.vehicle.port.VehicleDetectionPort;
+import dev.giro.vision.vehicle.port.VehicleDetectionPort.DetectedVehicle;
 import dev.giro.vision.vehicle.port.VehicleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,8 @@ class VehicleServiceTest {
     void setUp() {
         vehicleRepo = new InMemoryVehicleRepository();
         PlateRecognitionPort platePort = new StubPlateRecognitionPort();
-        vehicleService = new VehicleService(platePort, vehicleRepo);
+        VehicleDetectionPort detectionPort = new StubVehicleDetectionPort();
+        vehicleService = new VehicleService(platePort, detectionPort, vehicleRepo);
     }
 
     @Test
@@ -48,12 +51,26 @@ class VehicleServiceTest {
         assertThat(second.plate()).isEqualTo("DUP123");
     }
 
+    @Test
+    void detectAndIdentifyPipeline() {
+        List<Vehicle> vehicles = vehicleService.detectAndIdentify(new byte[]{1, 2, 3});
+        assertThat(vehicles).hasSize(1);
+        assertThat(vehicles.getFirst().plate()).isEqualTo("ABC1234");
+    }
+
     // ---- stubs ----
 
     static class StubPlateRecognitionPort implements PlateRecognitionPort {
         @Override
         public PlateResult readPlate(byte[] image) {
             return new PlateResult("ABC1234", 0.97, 10, 20, 100, 50);
+        }
+    }
+
+    static class StubVehicleDetectionPort implements VehicleDetectionPort {
+        @Override
+        public List<DetectedVehicle> detectVehicles(byte[] image) {
+            return List.of(new DetectedVehicle(10, 20, 200, 100, "car", 0.95, new byte[]{1}));
         }
     }
 

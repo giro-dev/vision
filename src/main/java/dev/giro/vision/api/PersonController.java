@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -38,6 +39,21 @@ public class PersonController {
         return PersonResponse.from(person);
     }
 
+    @PutMapping("/{id}")
+    @Operation(summary = "Update a person")
+    public PersonResponse update(@PathVariable UUID id,
+                                 @Valid @RequestBody CreatePersonRequest request) {
+        Person person = faceService.updatePerson(id, request.name());
+        return PersonResponse.from(person);
+    }
+
+    @PostMapping("/merge")
+    @Operation(summary = "Merge two persons (moves all faces from source to target, deletes source)")
+    public PersonResponse merge(@Valid @RequestBody MergePersonsRequest request) {
+        Person person = faceService.mergePersons(request.targetId(), request.sourceId());
+        return PersonResponse.from(person);
+    }
+
     @GetMapping
     @Operation(summary = "List all persons")
     public List<PersonResponse> list() {
@@ -58,6 +74,8 @@ public class PersonController {
     }
 
     public record CreatePersonRequest(@NotBlank String name) {}
+
+    public record MergePersonsRequest(UUID targetId, UUID sourceId) {}
 
     public record PersonResponse(UUID id, String name, String createdAt) {
         static PersonResponse from(Person p) {

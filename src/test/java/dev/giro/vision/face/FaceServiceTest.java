@@ -58,6 +58,29 @@ class FaceServiceTest {
         assertThat(faces).hasSize(1);
     }
 
+    @Test
+    void updatePerson() {
+        Person p = faceService.registerPerson("Old Name");
+        Person updated = faceService.updatePerson(p.id(), "New Name");
+        assertThat(updated.name()).isEqualTo("New Name");
+        assertThat(updated.id()).isEqualTo(p.id());
+    }
+
+    @Test
+    void mergePersons() {
+        Person target = faceService.registerPerson("Target");
+        Person source = faceService.registerPerson("Source");
+        Person result = faceService.mergePersons(target.id(), source.id());
+        assertThat(result.id()).isEqualTo(target.id());
+        assertThat(faceService.listPersons()).hasSize(1);
+    }
+
+    @Test
+    void recognizeReturnsEmptyWhenNoMatch() {
+        Optional<Person> result = faceService.recognize(new byte[]{1, 2, 3});
+        assertThat(result).isEmpty();
+    }
+
     // ---- stubs ----
 
     static class StubFaceRecognitionPort implements FaceRecognitionPort {
@@ -114,6 +137,21 @@ class FaceServiceTest {
         @Override
         public List<Face> findByPersonId(UUID personId) {
             return store.stream().filter(f -> personId.equals(f.personId())).toList();
+        }
+
+        @Override
+        public List<Face> findByEmbeddingNear(float[] embedding, double threshold, int limit) {
+            return List.of();
+        }
+
+        @Override
+        public void updatePersonId(UUID oldPersonId, UUID newPersonId) {
+            for (int i = 0; i < store.size(); i++) {
+                Face f = store.get(i);
+                if (oldPersonId.equals(f.personId())) {
+                    store.set(i, new Face(f.id(), newPersonId, f.embedding(), f.imageUrl(), f.confidence(), f.detectedAt()));
+                }
+            }
         }
     }
 }

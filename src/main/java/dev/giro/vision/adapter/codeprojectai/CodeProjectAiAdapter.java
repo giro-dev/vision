@@ -3,6 +3,7 @@ package dev.giro.vision.adapter.codeprojectai;
 import dev.giro.vision.face.domain.Face;
 import dev.giro.vision.face.port.FaceRecognitionPort;
 import dev.giro.vision.vehicle.port.PlateRecognitionPort;
+import dev.giro.vision.vehicle.port.VehicleDetectionPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class CodeProjectAiAdapter implements FaceRecognitionPort, PlateRecognitionPort {
+public class CodeProjectAiAdapter implements FaceRecognitionPort, PlateRecognitionPort, VehicleDetectionPort {
 
     private static final Logger log = LoggerFactory.getLogger(CodeProjectAiAdapter.class);
 
@@ -122,6 +123,53 @@ public class CodeProjectAiAdapter implements FaceRecognitionPort, PlateRecogniti
         } catch (Exception e) {
             log.error("Plate recognition failed: {}", e.getMessage());
             return new PlateResult("", 0.0, 0, 0, 0, 0);
+        }
+    }
+
+    @Override
+    public List<DetectedVehicle> detectVehicles(byte[] image) {
+        try {
+            MultipartBodyBuilder builder = new MultipartBodyBuilder();
+            builder.part("image", new ByteArrayResource(image) {
+                @Override public String getFilename() { return "image.jpg"; }
+            }).contentType(MediaType.IMAGE_JPEG);
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = webClient.post()
+                    .uri("/v1/vision/detection")
+                    .body(BodyInserters.fromMultipartData(builder.build()))
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+
+            if (response == null || !Boolean.TRUE.equals(response.get("success"))) {
+                log.warn("Vehicle detection returned no results");
+                return List.of();
+            }
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> predictions = (List<Map<String, Object>>) response.get("predictions");
+            if (predictions == null) return List.of();
+
+            return predictions.stream()
+                    .filter(p -> {
+                        String label = (String) p.getOrDefault("label", "");
+                        return "car".equals(label) || "truck".equals(label)
+                                || "bus".equals(label) || "motorcycle".equals(label);
+                    })
+                    .map(p -> {
+                        double confidence = ((Number) p.getOrDefault("confidence", 0.0)).doubleValue();
+                        int x = ((Number) p.getOrDefault("x_min", 0)).intValue();
+                        int y = ((Number) p.getOrDefault("y_min", 0)).intValue();
+                        int w = ((Number) p.getOrDefault("x_max", 0)).intValue() - x;
+                        int h = ((Number) p.getOrDefault("y_max", 0)).intValue() - y;
+                        String type = (String) p.getOrDefault("label", "unknown");
+                        return new DetectedVehicle(x, y, w, h, type, confidence, new byte[0]);
+                    })
+                    .toList();
+        } catch (Exception e) {
+            log.error("Vehicle detection failed: {}", e.getMessage());
+            return List.of();
         }
     }
 }

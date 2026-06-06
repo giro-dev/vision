@@ -6,10 +6,14 @@ import dev.giro.vision.face.port.PersonRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class FaceService {
+
+    private static final double SIMILARITY_THRESHOLD = 0.6;
+    private static final int MAX_MATCHES = 5;
 
     private final FaceRecognitionPort recognitionPort;
     private final FaceRepository faceRepository;
@@ -31,8 +35,32 @@ public class FaceService {
         return recognitionPort.generateEmbedding(faceImage);
     }
 
+    public Optional<Person> recognize(byte[] faceImage) {
+        float[] embedding = recognitionPort.generateEmbedding(faceImage);
+        List<Face> matches = faceRepository.findByEmbeddingNear(embedding, SIMILARITY_THRESHOLD, MAX_MATCHES);
+        if (matches.isEmpty()) {
+            return Optional.empty();
+        }
+        UUID personId = matches.getFirst().personId();
+        return personRepository.findById(personId);
+    }
+
     public Person registerPerson(String name) {
         return personRepository.save(Person.create(name));
+    }
+
+    public Person updatePerson(UUID id, String name) {
+        Person existing = getPerson(id);
+        Person updated = new Person(existing.id(), name, existing.createdAt());
+        return personRepository.save(updated);
+    }
+
+    public Person mergePersons(UUID targetId, UUID sourceId) {
+        Person target = getPerson(targetId);
+        getPerson(sourceId);
+        faceRepository.updatePersonId(sourceId, targetId);
+        personRepository.deleteById(sourceId);
+        return target;
     }
 
     public List<Person> listPersons() {
