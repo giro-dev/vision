@@ -25,7 +25,7 @@ open http://localhost:8080/swagger-ui.html
 ├── docker-compose.yml          # Full stack: Postgres, CodeProject.AI, app
 ├── Dockerfile                  # Multi-stage build for Spring Boot
 ├── Makefile                    # Developer shortcuts
-├── pom.xml                     # Maven build (Java 21, Spring Boot 3.4)
+├── pom.xml                     # Maven build (Java 25, Spring Boot 4)
 ├── src/main/java/dev/giro/vision/
 │   ├── VisionApplication.java
 │   ├── api/                    # REST controllers
@@ -59,7 +59,9 @@ open http://localhost:8080/swagger-ui.html
 | `POST` | `/api/persons` | Register a known person |
 | `GET` | `/api/persons` | List all persons |
 | `GET` | `/api/persons/{id}` | Get person by ID |
+| `PUT` | `/api/persons/{id}` | Update person |
 | `DELETE` | `/api/persons/{id}` | Delete person |
+| `POST` | `/api/persons/merge` | Merge two persons |
 | `POST` | `/api/cameras` | Register a camera |
 | `GET` | `/api/cameras` | List cameras |
 | `GET` | `/api/cameras/test?host=` | Test camera connectivity |
@@ -86,8 +88,9 @@ Hexagonal (Ports & Adapters) — domain logic is independent from external tech:
 
 | Component | Technology |
 |-----------|-----------|
-| Language | Java 21 |
-| Framework | Spring Boot 3.4 |
+| Language | Java 25 |
+| Framework | Spring Boot 4.0 |
+| AI | Spring AI 2.0 (Phase 10 foundation) |
 | Database | PostgreSQL 16 + pgvector |
 | Migrations | Flyway |
 | AI Engine | CodeProject.AI Server |

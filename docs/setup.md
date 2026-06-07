@@ -12,15 +12,16 @@
 ### Phase 1 (Core Backend)
 
 - Java 25
-- Spring Boot
-- PostgreSQL
+- Spring Boot 4
+- Spring AI
+- PostgreSQL + pgvector
 - Flyway
 - Testcontainers
 - Docker Compose
 
 ## Suggested Bootstrap Order
 
-1. Create backend skeleton (Spring Boot, Java 21)
+1. Create backend skeleton (Spring Boot 4, Java 25)
 2. Add module packages (`camera`, `face`, `vehicle`, `event`, `training`, `persistence`)
 3. Define core ports and use-case services
 4. Add PostgreSQL + Flyway migrations

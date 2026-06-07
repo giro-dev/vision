@@ -10,7 +10,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
 
   flyway:
     enabled: true
@@ -24,6 +24,14 @@ vision:
     default-host: ""
     default-user: ""
     default-password: ""
+
+# Spring AI (Phase 10 foundation)
+spring.ai:
+  openai:
+    api-key: ${OPENAI_API_KEY:not-set}
+    chat:
+      options:
+        model: gpt-4o-mini
 
 # Actuator
 management:
@@ -83,4 +91,4 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
